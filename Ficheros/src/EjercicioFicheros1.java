@@ -1,29 +1,26 @@
 import java.io.BufferedWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Scanner;
 
 public class EjercicioFicheros1 {
-    public static void main(String[] args) throws Exception {
-        Path path = Path.of("D:\\DANI\\Acceso a datos\\Ficheros\\archivo.txt");
+      public static void main(String[] args) throws Exception {
 
-        try (BufferedWriter bw = Files.newBufferedWriter(Path.of("D:/DANI/Acceso a datos/Ficheros/archivo.txt"),StandardCharsets.UTF_8)) {
+        try (BufferedWriter bw = Files.newBufferedWriter(Path.of("D:/DANI/Acceso a datos/Ficheros/archivo.txt"))) {
             bw.write("aaañññaaa");
+            bw.flush();
+
+            bw.newLine();
+            bw.write("Otra linea");
+
+            Scanner sc = new Scanner(System.in);
+            System.out.println("Dale a enter para escribir");
+            sc.nextLine();
 
         } catch (Exception e) {
 
         }
 
         System.out.println("Fin del progreso");
-        /* 
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
-            String linea;
-            while ((linea = bufferedReader.readLine()) != null) {
-                System.out.println(linea);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        */
     }
 }
