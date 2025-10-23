@@ -5,11 +5,13 @@ public class Contacto implements Serializable {
     private String nombre;
     private int telefono;
     private String correo;
+    private boolean borrado; //Para poder eliminar un contacto creado pero que se puede recuperar
 
     public Contacto(String nombre, int telefono, String correo) {
         this.nombre = nombre;
         this.telefono = telefono;
         this.correo = correo;
+        this.borrado = false;
      
     }
 
@@ -37,7 +39,17 @@ public class Contacto implements Serializable {
         this.correo = correo;
     }
 
+    public boolean isBorrado() {
+        return borrado;
+    }
+
+    public void setBorrado(boolean borrado) {
+        this.borrado = borrado;
+    }
+    
+
     public void mostrarAgenda() {
+        String estado = borrado ? "Activo" : "Borrado";
         System.out.println( "Contacto{" +
                 "nombre='" + nombre + '\'' +
                 ", telefono=" + telefono +

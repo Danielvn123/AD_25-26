@@ -1,3 +1,6 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -8,20 +11,23 @@ public class Agenda {
 
     private ArrayList<Contacto> Agenda;
 
+    private final String archivoAgenda = "archivoAgenda";
+
     public Agenda() {
         Agenda = new ArrayList<Contacto>();
     }
 
-    //Crear la agenda con o sin contactos
+    // Crear la agenda con o sin contactos
     public void crear() {
         Scanner sc = new Scanner(System.in);
 
         System.out.println("¿Quieres crear una agenda con contactos (s/n)?");
         String respuesta = sc.nextLine();
-        if (respuesta.equalsIgnoreCase("s")) {
+        if (respuesta.equalsIgnoreCase("n")) {
             Agenda.clear();
-            System.out.println("Agenda creada con contactos");
-        } else if (respuesta.equalsIgnoreCase("n")) {
+             guardarAgendaEnArchivo();
+            System.out.println("Agenda creada sin contactos");
+        } else if (respuesta.equalsIgnoreCase("s")) {
             Agenda.clear();
             Agenda.add(new Contacto("Daniel", 645231564, "danielv@gmail.com"));
             Agenda.add(new Contacto("Carmen", 650345621, "carmenc@gmail.com"));
@@ -29,7 +35,8 @@ public class Agenda {
             Agenda.add(new Contacto("Alejandro", 632514687, "alejandrot@gmail.com"));
             Agenda.add(new Contacto("Javier", 615224966, "javip@gmail.com"));
             Agenda.add(new Contacto("Ismael", 624531245, "ismaell@gmail.com"));
-            System.out.println("Agenda creada sin contactos");
+            guardarAgendaEnArchivo();
+            System.out.println("Agenda creada con contactos");
         } else {
             System.out.println("Respuesta no válida");
             crear();
@@ -46,28 +53,15 @@ public class Agenda {
         return null;
     }
 
-    //Vaciamos la agenda
+    // Vaciamos la agenda
     public void vaciar() {
         Agenda.clear();
+        guardarAgendaEnArchivo();
+
     }
 
-
-    public void añadirContacto(Contacto nuevo) {
-        if (nuevo == null) {
-            System.out.println("No se puede añadir un contacto nulo.");
-            return;
-        }
-
-        Contacto existente = dameContacto(nuevo.getNombre());
-        if (existente != null) {
-            System.out.println("El contacto '" + nuevo.getNombre() + "' ya existe en la agenda.");
-        } else {
-            Agenda.add(nuevo);
-            System.out.println("Contacto añadido correctamente: " + nuevo.getNombre());
-        }
-    }
-
-    public void añadirContactoConsola(Scanner sc) {
+    // Método en el que añadimos un contacto a la agenda
+    public void añadirContacto(Scanner sc) {
         System.out.println("Introduce el nombre: ");
         String nombre = sc.nextLine();
 
@@ -75,37 +69,142 @@ public class Agenda {
         int telefono = sc.nextInt();
         sc.nextLine();
 
-        System.out.println("Introduce eel email: ");
+        System.out.println("Introduce el email: ");
         String email = sc.nextLine();
 
-        Contacto nuevo = new Contacto(nombre, telefono, email);
-        añadirContacto(nuevo);
+        for (Contacto c : Agenda) {
+            if (c.getNombre().equalsIgnoreCase(nombre)) {
+                System.out.println("El contacto con nombre " + nombre + "ya existe en la agenda");
+            }
+        }
+        Agenda.add(new Contacto(nombre, telefono, email));
+        System.out.println("Contacto añadido correctamente");
+        guardarAgendaEnArchivo();
     }
 
-    //Mostramos el contacto que elegimos nosotros
+    // Mostramos el contacto que elegimos nosotros
     public void mostrarContacto(String nombre) {
         Contacto contacto = dameContacto(nombre);
 
         if (contacto == null)
-            System.out.println("Contacto no ENCONTRADO" + nombre);
+            System.out.println("Contacto no ENCONTRADO " + nombre);
         else {
             contacto.mostrarAgenda();
         }
     }
 
-    //Mostramos la agenda entera de contactos
+    // Mostramos la agenda entera de contactos
     public void mostrar() {
         if (Agenda.isEmpty())
             System.out.println("Agenda VACIA");
         else {
             int contador = 0;
             for (Contacto c : Agenda) {
+                if(!c.isBorrado()){ //Selecciona solo los contactos activos
                 c.mostrarAgenda();
                 contador++;
-                System.out.println("La agenda contiene " + contador + " contactos");
             }
         }
+            System.out.println("La agenda contiene " + contador + " contactos");
+        }
     }
+
+    // Método para modificar un contacto ya existente
+    public void modificarContacto() {
+        System.out.println("Introduce el nombre del contacto que quieres modificar: ");
+        String nombre = sc.nextLine();
+
+        boolean encontrado = false;
+
+        for (Contacto c : Agenda) {
+            if (c.getNombre().equalsIgnoreCase(nombre)) {
+                encontrado = true;
+
+                System.out.println("Introduce el nuevo nombre: ");
+                String nuevoNombre = sc.nextLine();
+                c.setNombre(nuevoNombre);
+
+                System.out.println("Introduce el nuevo teléfono: ");
+                int nuevoTelefono = sc.nextInt();
+                sc.nextLine();
+                c.setTelefono(nuevoTelefono);
+
+                System.out.println("Introduce el nuevo email: ");
+                String nuevoEmail = sc.nextLine();
+                c.setCorreo(nuevoEmail);
+
+                System.out.println("Contacto modificado correctamente.");
+                guardarAgendaEnArchivo();
+                break;
+            }
+        }
+        if (!encontrado) {
+            System.out.println("No se encontró ningún contacto con el nombre " + nombre + ".");
+        }
+    }
+
+    //Método que borra un contacto ya existente en la agenda
+    public void borrarContacto() {
+        System.out.println("Introduce el nombre del contacto que quieres borrar: ");
+        String nombre = sc.nextLine();
+
+        boolean encontrado = false;
+
+        for (Contacto c : Agenda) {
+            if (c.getNombre().equalsIgnoreCase(nombre)) {
+                encontrado = true;
+
+                if (!c.isBorrado()) {
+                    c.setBorrado(true);
+                    System.out.println("Contacto " + nombre + " borrado");
+                } else {
+                    System.out.println("El contacto " + nombre + " ya está borrado");
+                }
+                break;
+            }
+        }
+            if (!encontrado) {
+                System.out.println("No se encuentra ningún contacto con ese nombre " + nombre);
+            }
+        }
+
+    // Método creado para guardar contactos de la agenda en un archivo
+    public void guardarAgendaEnArchivo() {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(archivoAgenda))) {
+            for (Contacto c : Agenda) {
+                pw.println(c.getNombre() + "," + c.getTelefono() + "," + c.getCorreo() + "," + c.isBorrado());
+            }
+            System.out.println("Agenda guardada correctamente en el archivo.");
+        } catch (IOException e) {
+            System.out.println("Error al guardar la agenda: " + e.getMessage());
+        }
+    }
+
+    //Método para recuperar contactos borrados
+    public void restaurarContacto(Scanner sc) {
+    System.out.println("Introduce el nombre del contacto que quieres recuperar: ");
+    String nombre = sc.nextLine();
+
+    boolean encontrado = false;
+
+    for (Contacto c : Agenda) {
+        if (c.getNombre().equalsIgnoreCase(nombre)) {
+            encontrado = true;
+            if (!c.isBorrado()) {
+                c.setBorrado(true);
+                System.out.println("Contacto '" + nombre + "' recuperado correctamente.");
+            } else {
+                System.out.println("El contacto '" + nombre + "' ya está activo.");
+            }
+            break;
+        }
+    }
+
+    if (!encontrado) {
+        System.out.println("No se encontró ningún contacto con el nombre '" + nombre + "'.");
+    }
+}
+
 
     public static void Menu() {
 

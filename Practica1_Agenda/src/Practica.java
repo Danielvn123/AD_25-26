@@ -17,7 +17,7 @@ public class Practica {
                 agenda.crear();
                 break;
             case 2:
-                agenda.añadirContactoConsola(sc);
+                agenda.añadirContacto(sc);
                 break;
             case 3:
             System.out.println("Introduce el nombre del contacto a buscar");
@@ -25,9 +25,14 @@ public class Practica {
                 agenda.mostrarContacto(nombreBuscar);
                 break;
             case 4:
-                agenda.mostrar();
+                agenda.modificarContacto();
                 break;
-            
+            case 5:
+                agenda.borrarContacto();
+                break;
+            case 6:
+                agenda.restaurarContacto(sc);
+                break;
             case 7:
                 agenda.mostrar();
                 break;
