@@ -49,7 +49,7 @@ public class Contacto implements Serializable {
     
 
     public void mostrarAgenda() {
-        String estado = borrado ? "Activo" : "Borrado";
+        String estado = borrado ? "Borrado" : "Activo";
         System.out.println( "Contacto{" +
                 "nombre='" + nombre + '\'' +
                 ", telefono=" + telefono +
