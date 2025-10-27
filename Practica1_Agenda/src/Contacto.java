@@ -47,7 +47,6 @@ public class Contacto implements Serializable {
         this.borrado = borrado;
     }
     
-
     public void mostrarAgenda() {
         String estado = borrado ? "Borrado" : "Activo";
         System.out.println( "Contacto{" +

@@ -5,6 +5,7 @@ public class Practica {
         Scanner sc = new Scanner(System.in);
         Agenda agenda = new Agenda();
         int opcion;
+        int opcion2;
 
         do {
             agenda.dameOpcion();
@@ -42,29 +43,32 @@ public class Practica {
                     break;
                 case 9:
                     System.out.println("Elige opción del submenú: ");
-                    int subOpcion = sc.nextInt();
-                    sc.nextLine();
+                    do {
+                        agenda.NuevoMenu();
+                        System.out.print("Elige opción del submenú: ");
+                        opcion2 = sc.nextInt();
+                        sc.nextLine();
 
-                    switch (subOpcion) {
-                        case 1:
-                            agenda.mostrarInformacion();
-                            break;
-                        case 2:
-                            agenda.copiaDeSeguridad();
-                            break;
-                        // case 3:
-                        // agenda.restaurarCopiaDeSeguridad();
-                        // System.out.println("Agenda VACIA");
-                        // break;
-                         case 4:
-                            System.out.println("Submenú cerrado");
-                            break;
-                        default:
-                            System.out.println("Opción del submenú errónea");
-                            break;
-                    }
+                        switch (opcion2) {
+                            case 1:
+                                agenda.mostrarInformacion();
+                                break;
+                            case 2:
+                                agenda.copiaDeSeguridad();
+                                break;
+                            case 3:
+                                agenda.restaurarCopiaDeSeguridad();
+                                System.out.println("Agenda VACIA");
+                                break;
+                            case 4:
+                                System.out.println("Submenú cerrado");
+                                break;
+                            default:
+                                System.out.println("Opción del submenú errónea");
+                                break;
+                        }
+                    } while (opcion2 != 4);
                     break;
-
                 case 10:
                     System.out.println("FINAL");
                     break;
@@ -73,6 +77,6 @@ public class Practica {
                     System.out.println("OPCIÓN Erronea");
                     break;
             }
-        } while (opcion != 15);
+        } while (opcion != 10);
     }
 }

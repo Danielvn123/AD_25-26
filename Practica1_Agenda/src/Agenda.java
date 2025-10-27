@@ -9,7 +9,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 import java.io.PrintWriter;
-
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class Agenda {
 
@@ -18,6 +22,8 @@ public class Agenda {
     private ArrayList<Contacto> Agenda;
 
     private final String archivoAgenda = "archivoAgenda";
+
+    private final String archivoCopiaSeguridad = "archivoCopiaSeguridad";
 
     public Agenda() {
         Agenda = new ArrayList<Contacto>();
@@ -69,14 +75,32 @@ public class Agenda {
     // Método en el que añadimos un contacto a la agenda
     public void añadirContacto(Scanner sc) {
         System.out.println("Introduce el nombre: ");
-        String nombre = sc.nextLine();
+        String nombre = sc.nextLine().trim();
+
+        while (!nombre.matches("\\p{L}{1,10}")) {
+            System.out.println("Nombre inválido. Debe tener solo letras y un máximo de 10 caracteres.");
+            System.out.print("Introduce el nombre de nuevo: ");
+            nombre = sc.nextLine().trim();
+        }
 
         System.out.println("Introduce telefono: ");
-        int telefono = sc.nextInt();
-        sc.nextLine();
+        String telefonoStr = sc.nextLine().trim();
+
+        while (!telefonoStr.matches("\\d{9}")) {
+            System.out.println("Teléfono inválido. Debe tener exactamente 9 dígitos.");
+            System.out.print("Introduce el teléfono de nuevo: ");
+            telefonoStr = sc.nextLine().trim();
+        }
+        int telefono = Integer.parseInt(telefonoStr);
 
         System.out.println("Introduce el email: ");
-        String email = sc.nextLine();
+        String email = sc.nextLine().trim();
+
+        while (!email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
+            System.out.println("Email inválido. Debe terminar con @gmail.com");
+            System.out.print("Introduce el email de nuevo: ");
+            email = sc.nextLine().trim();
+        }
 
         for (Contacto c : Agenda) {
             if (c.getNombre().equalsIgnoreCase(nombre)) {
@@ -119,7 +143,7 @@ public class Agenda {
     // Método para modificar un contacto ya existente
     public void modificarContacto() {
         System.out.println("Introduce el nombre del contacto que quieres modificar: ");
-        String nombre = sc.nextLine();
+        String nombre = sc.nextLine().trim();
 
         boolean encontrado = false;
 
@@ -128,19 +152,35 @@ public class Agenda {
                 encontrado = true;
 
                 System.out.println("Introduce el nuevo nombre: ");
-                String nuevoNombre = sc.nextLine();
+                String nuevoNombre = sc.nextLine().trim();
+                while (!nuevoNombre.matches("\\p{L}{1,10}")) {
+                    System.out.println("Nombre inválido. Solo letras, máximo 10 caracteres.");
+                    System.out.print("Introduce el nuevo nombre de nuevo: ");
+                    nuevoNombre = sc.nextLine().trim();
+                }
+
+                System.out.print("Introduce el nuevo teléfono: ");
+                String telefonoStr = sc.nextLine().trim();
+                while (!telefonoStr.matches("\\d{9}")) {
+                    System.out.println("Teléfono inválido. Debe tener exactamente 9 dígitos.");
+                    System.out.print("Introduce el teléfono de nuevo: ");
+                    telefonoStr = sc.nextLine().trim();
+                }
+                int nuevoTelefono = Integer.parseInt(telefonoStr);
+
+                System.out.print("Introduce el nuevo email: ");
+                String nuevoEmail = sc.nextLine().trim();
+                while (!nuevoEmail.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
+                    System.out.println("Email inválido. Debe terminar con @gmail.com");
+                    System.out.print("Introduce el email de nuevo: ");
+                    nuevoEmail = sc.nextLine().trim();
+                }
+
                 c.setNombre(nuevoNombre);
-
-                System.out.println("Introduce el nuevo teléfono: ");
-                int nuevoTelefono = sc.nextInt();
-                sc.nextLine();
                 c.setTelefono(nuevoTelefono);
-
-                System.out.println("Introduce el nuevo email: ");
-                String nuevoEmail = sc.nextLine();
                 c.setCorreo(nuevoEmail);
 
-                System.out.println("Contacto modificado correctamente.");
+                System.out.println("Contacto modificad correctamente");
                 guardarAgendaEnArchivo();
                 break;
             }
@@ -259,34 +299,52 @@ public class Agenda {
 
     // Método para la copia de seguridad
     public void copiaDeSeguridad() {
-    File archivoOriginal = new File(archivoAgenda);
+        Path origen = Paths.get(archivoAgenda);
+        Path destino = Paths.get(archivoCopiaSeguridad);
 
-    if (!archivoOriginal.exists()) {
-        System.out.println("No se puede hacer la copia de seguridad: el archivo original no existe.");
-        return;
-    }
-
-    // Crear nombre único con fecha y hora
-    String fechaHora = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
-    String nombreCopia = "archivoAgenda_backup_" + fechaHora + ".txt";
-    File copiaArchivo = new File(archivoOriginal.getParent(), nombreCopia);
-
-    try (BufferedReader br = new BufferedReader(new FileReader(archivoOriginal));
-         BufferedWriter bw = new BufferedWriter(new FileWriter(copiaArchivo))) {
-
-        String linea;
-        while ((linea = br.readLine()) != null) {
-            bw.write(linea);
-            bw.newLine(); 
+        try {
+            Files.copy(origen, destino, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Copia de seguridad creada: " + destino.toAbsolutePath());
+        } catch (NoSuchFileException e) {
+            System.out.println("No existe el archivo de agenda, no se puede hacer la copia de seguridad");
+        } catch (IOException e) {
+            System.out.println("Error al crear la copia de seguridad: " + e.getMessage());
         }
-
-        System.out.println("Copia de seguridad creada correctamente: " + copiaArchivo.getAbsolutePath());
-
-    } catch (IOException e) {
-        System.out.println("Error al crear la copia de seguridad: " + e.getMessage());
     }
-}
 
+    // Método para restaurar la copia de seguridad
+    public void restaurarCopiaDeSeguridad() {
+        Path origen = Paths.get(archivoCopiaSeguridad);
+        Path destino = Paths.get(archivoAgenda);
+
+        try {
+            Files.copy(origen, destino, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Se ha restaurado la agenda");
+
+            Agenda.clear();
+            try (BufferedReader br = new BufferedReader(new FileReader(archivoAgenda))) {
+                String linea;
+                while ((linea = br.readLine()) != null) {
+                    String[] partes = linea.split(";");
+                    if (partes.length == 4) {
+                        String nombre = partes[0];
+                        String correo = partes[1];
+                        int telefono = Integer.parseInt(partes[2]);
+                        boolean borrado = Boolean.parseBoolean(partes[3]);
+                        Contacto c = new Contacto(nombre, telefono, correo);
+                        c.setBorrado(borrado);
+                        Agenda.add(c);
+                    }
+                }
+            }
+            System.out.println("Contactos cargados correctamente");
+
+        } catch (NoSuchFileException e) {
+            System.out.println("No existe la copia de seguridad");
+        } catch (IOException e) {
+            System.out.println("Error al restaurar la agenda: " + e.getMessage());
+        }
+    }
 
     public static void NuevoMenu() {
 
@@ -301,5 +359,10 @@ public class Agenda {
     public void dameOpcion() {
 
         Menu();
+    }
+
+    public void dameOpcion2() {
+
+        NuevoMenu();
     }
 }
